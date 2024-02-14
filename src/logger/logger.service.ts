@@ -1,15 +1,10 @@
 import { Logger } from 'tslog';
 
 export class LoggerService {
-  public logger: Logger;
+  public logger: Logger<any>;
 
   constructor() {
-    this.logger = new Logger({
-      displayInstanceName: false,
-      displayLoggerName: false,
-      displayFilePath: 'hidden',
-      displayFunctionName: false
-    });
+    this.logger = new Logger({});
   }
 
   log(...args: unknown[]) {
