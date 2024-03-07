@@ -1,3 +1,4 @@
+import { json } from 'body-parser';
 import express, { Express } from 'express';
 import { Server } from 'http';
 import { inject, injectable } from 'inversify';
@@ -26,11 +27,16 @@ export class App {
 		this.app.use('/users', this.userController.router);
 	}
 
+	useMiddleware(): void {
+		this.app.use(json());
+	}
+
 	useExeptionFilters(): void {
 		this.app.use(this.exeptionFilter.catch.bind(this.exeptionFilter));
 	}
 
 	public async init(): Promise<void> {
+		this.useMiddleware();
 		this.useRoutes();
 		this.useExeptionFilters();
 		this.server = this.app.listen(this.port);
