@@ -7,10 +7,14 @@ import { TYPES } from '../types';
 import { UserLoginDto } from '../users/dto/user-login.dto';
 import { UserRegisterDto } from '../users/dto/user-register.dto';
 import { IUserController } from '../users/users.controller.interface';
+import { IUserService } from '../users/users.service.interface';
 
 @injectable()
 export class UserController extends BaseController implements IUserController {
-	constructor(@inject(TYPES.ILogger) private loggerService: ILogger) {
+	constructor(
+		@inject(TYPES.ILogger) private loggerService: ILogger,
+		@inject(TYPES.UserService) private userService: IUserService,
+	) {
 		super(loggerService);
 		this.bindRoutes([
 			{ path: '/register', method: 'post', func: this.register },
@@ -22,7 +26,16 @@ export class UserController extends BaseController implements IUserController {
 		next(new HTTPError(401, 'Ошибка авторизации', 'login'));
 	}
 
-	register(req: Request<{}, {}, UserRegisterDto>, res: Response, next: NextFunction): void {
-		this.ok(res, 'register');
+	async register(
+		{ body }: Request<{}, {}, UserRegisterDto>,
+		res: Response,
+		next: NextFunction,
+	): Promise<void> {
+		const result = await this.userService.createUser(body);
+		if (!result) {
+			return next(new HTTPError(422, 'Такой пользователь уже существует', 'register'));
+		}
+
+		this.ok(res, { email: result.email });
 	}
 }
